@@ -38,7 +38,6 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
 
     /*** write msg_no at the beginning of the message buffer ***/
 /*** TO BE DONE START ***/
-
 	sprintf(message, "%d", msg_no);
 
 /*** TO BE DONE END ***/
@@ -52,9 +51,8 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
 
     /*** Send the message through the socket (blocking)  ***/
 /*** TO BE DONE START ***/
-	
-	send(tcp_socket, message, msg_size, 0);
-
+	sent_bytes = send(tcp_socket, message, msg_size, 0);
+	printf("sent:: %ld\n", sent_bytes);
 /*** TO BE DONE END ***/
 
     /*** Receive answer through the socket (blocking) ***/
@@ -117,7 +115,8 @@ int main(int argc, char **argv)
     /*** call getaddrinfo() in order to get Pong Server address in binary form ***/
 /*** TO BE DONE START ***/
 
-	getaddrinfo("seti.dibris.unige.it", "1491", &gai_hints, &server_addrinfo);
+	//getaddrinfo("seti.dibris.unige.it", "1491", &gai_hints, &server_addrinfo);
+	getaddrinfo(argv[1], argv[2], &gai_hints, &server_addrinfo);
 
 /*** TO BE DONE END ***/
 
@@ -131,14 +130,12 @@ int main(int argc, char **argv)
 	struct addrinfo *rp;
 
 	for (rp = server_addrinfo; rp != NULL; rp = rp->ai_next) {
-		int sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-		if (sfd == -1)
+		tcp_socket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+		if (tcp_socket == -1)
 			continue;
 
-		if (connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1)
+		if (connect(tcp_socket, rp->ai_addr, rp->ai_addrlen) != -1)
 			break;			/* Success */
-
-		close(sfd);
 	}
 
 	if (rp == NULL) {               /* No address succeeded */
@@ -161,6 +158,7 @@ int main(int argc, char **argv)
     /*** Write the request on socket ***/
 /*** TO BE DONE START ***/
 
+	write(tcp_socket, request, sizeof(request));
 
 /*** TO BE DONE END ***/
 
@@ -176,7 +174,7 @@ int main(int argc, char **argv)
 /*** TO BE DONE END ***/
 
     /*** else ***/
-	printf(" ... Pong server agreed :-)\n");
+	printf(" ... Pong server agreed:-)\n");
 
 	{
 		double ping_times[norep];

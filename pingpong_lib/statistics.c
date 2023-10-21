@@ -30,6 +30,17 @@ double timespec_delta2milliseconds(struct timespec *last,
  ***/
 
 /*** TO BE DONE START ***/
+	long sec_diff = last->tv_sec - previous->tv_sec;
+    long nsec_diff = last->tv_nsec - previous->tv_nsec;
+
+    // If the difference in nanoseconds is negative, we need to carry over a second.
+    if (nsec_diff < 0) {
+        nsec_diff += 1000000000; // 1 second = 1,000,000,000 nanoseconds
+        sec_diff--;
+    }
+
+    // Convert both differences to milliseconds and return the sum.
+    return sec_diff * 1000.0 + nsec_diff / 1000000.0;
 
 
 /*** TO BE DONE END ***/
