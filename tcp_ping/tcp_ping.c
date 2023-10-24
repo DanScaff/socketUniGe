@@ -38,6 +38,7 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
 
     /*** write msg_no at the beginning of the message buffer ***/
 /*** TO BE DONE START ***/
+
 	sprintf(message, "%d", msg_no);
 
 /*** TO BE DONE END ***/
@@ -45,14 +46,16 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
     /*** Store the current time in send_time ***/
 /*** TO BE DONE START ***/
 
-	timespec_get(&send_time, TIME_UTC);
+	if(clock_gettime(CLOCK_TYPE, &send_time))
+		fail_errno("Error in retrieving current time");
 
 /*** TO BE DONE END ***/
 
     /*** Send the message through the socket (blocking)  ***/
 /*** TO BE DONE START ***/
+
 	sent_bytes = send(tcp_socket, message, msg_size, 0);
-	printf("sent:: %ld\n", sent_bytes);
+	
 /*** TO BE DONE END ***/
 
     /*** Receive answer through the socket (blocking) ***/
@@ -65,7 +68,8 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
     /*** Store the current time in recv_time ***/
 /*** TO BE DONE START ***/
 
-	timespec_get(&recv_time, TIME_UTC);
+	if(clock_gettime(CLOCK_TYPE, &recv_time))
+		fail_errno("Error in retrieving current time");
 
 /*** TO BE DONE END ***/
 
@@ -108,7 +112,7 @@ int main(int argc, char **argv)
 
 	gai_hints.ai_family = AF_UNSPEC;
 	gai_hints.ai_socktype = SOCK_STREAM;
-	gai_hints.ai_protocol = 0;
+	gai_hints.ai_protocol = 0; //IPPROTO_TCP
 
 /*** TO BE DONE END ***/
 
@@ -158,11 +162,11 @@ int main(int argc, char **argv)
     /*** Write the request on socket ***/
 /*** TO BE DONE START ***/
 
-	write(tcp_socket, request, sizeof(request));
+	write(tcp_socket, request, strlen(request));
 
 /*** TO BE DONE END ***/
 
-	nr = read(tcp_socket, answer, sizeof(answer));
+	nr = read(tcp_socket, answer, strlen(answer));
 	if (nr < 0)
 		fail_errno("TCP Ping could not receive answer from Pong server");
 		

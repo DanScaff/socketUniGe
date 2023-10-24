@@ -39,6 +39,7 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int ping_soc
     /*** write msg_no at the beginning of the message buffer ***/
 /*** TO BE DONE START ***/
 
+	sprintf(message, "%d", msg_no);
 
 /*** TO BE DONE END ***/
 
@@ -47,18 +48,23 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int ping_soc
 	/*** Store the current time in send_time ***/
 /*** TO BE DONE START ***/
 
+	if(clock_gettime(CLOCK_TYPE, &send_time))
+		fail_errno("Error in retrieving current time");
+
 
 /*** TO BE DONE END ***/
 
 	/*** Send the message through the socket (non blocking mode) ***/
 /*** TO BE DONE START ***/
 
+	sent_bytes = send(ping_socket, message, msg_size, 0);
 
 /*** TO BE DONE END ***/
 
 	/*** Receive answer through the socket (non blocking mode, with timeout) ***/
 /*** TO BE DONE START ***/
 
+	sent_bytes = send(ping_socket, message, msg_size, 0); //camnbiare flag
 
 /*** TO BE DONE END ***/
 
