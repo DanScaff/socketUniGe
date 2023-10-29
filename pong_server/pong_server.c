@@ -51,6 +51,9 @@ void tcp_pong(int message_no, size_t message_size, FILE *in_stream, int out_sock
                 /*** get time-stamp time2 from the clock ***/
 /*** TO BE DONE START ***/
 
+	if(clock_gettime(CLOCK_TYPE, &time2))
+		fail_errno("Error in retrieving current time");
+
 
 /*** TO BE DONE END ***/
 
@@ -63,6 +66,9 @@ void tcp_pong(int message_no, size_t message_size, FILE *in_stream, int out_sock
 
                 /*** get time-stamp time3 from the clock ***/
 /*** TO BE DONE START ***/
+
+	if(clock_gettime(CLOCK_TYPE, &time3))
+		fail_errno("Error in retrieving current time");
 
 
 /*** TO BE DONE END ***/
@@ -92,6 +98,9 @@ void udp_pong(int dgrams_no, int dgram_sz, int pong_socket)
 
                 /*** get time-stamp time2 from the clock ***/
 /*** TO BE DONE START ***/
+
+	if(clock_gettime(CLOCK_TYPE, &time2))
+		fail_errno("Error in retrieving current time");
 
 
 /*** TO BE DONE END ***/
@@ -128,6 +137,9 @@ void udp_pong(int dgrams_no, int dgram_sz, int pong_socket)
                 /*** get time-stamp time3 from the clock ***/
 /*** TO BE DONE START ***/
 
+	if(clock_gettime(CLOCK_TYPE, &time3))
+		fail_errno("Error in retrieving current time");
+
 
 /*** TO BE DONE END ***/
 
@@ -163,7 +175,16 @@ int open_udp_socket(int *pong_port)
 
                 /*** create DGRAM socket, call getaddrinfo() to set port number, and bind() ***/
 /*** TO BE DONE START ***/
+	if(gai_rv = getaddrinfo(NULL, port_number_as_str, &gai_hints, &pong_addrinfo))
+		fail("could not get address info");
 
+	if((udp_socket = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+		fail_errno("could not create socket");
+
+	if((bind_rv = bind(udp_socket, pong_addrinfo->ai_addr, pong_addrinfo->ai_addrlen)) == 0){
+		*pong_port = port_number;
+		return udp_socket;
+	}
 
 /*** TO BE DONE END ***/
 
@@ -288,7 +309,14 @@ void server_loop(int server_socket) {
 /*** check for possible accept() errors, and if connection was correctly
      establised fork() and have the child process call serve_client() ***/
 /*** TO BE DONE START ***/
-
+	if(request_socket == -1){
+		if(errno == EINTR) continue;
+		fail_errno("Error in accepting connection");
+	}
+	if((pid = fork()) == -1)
+		fail_errno("Error in forking process");
+	if(pid == 0)
+	serve_client(request_socket, &client_addr);
 
 /*** TO BE DONE END ***/
 
@@ -314,7 +342,15 @@ int main(int argc, char **argv)
          *** create STREAM socket, bind() and listen()                   ***/
 /*** TO BE DONE START ***/
 
+	if((gai_rv = getaddrinfo(NULL, argv[1], &gai_hints, &server_addrinfo)))
+		fail(gai_strerror(gai_rv));
+	if((server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
+		fail_errno("error creating socket");
+	if(bind(server_socket, (struct sockaddr*) server_addrinfo->ai_addr, server_addrinfo->ai_addrlen) == -1)
+		fail_errno("error binding socket");
 
+	if(listen(server_socket, LISTENBACKLOG) == -1)
+		fail_errno("error during listening");
 
 /*** TO BE DONE END ***/
 

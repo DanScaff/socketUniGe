@@ -57,20 +57,34 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int ping_soc
 	/*** Send the message through the socket (non blocking mode) ***/
 /*** TO BE DONE START ***/
 
-	sent_bytes = send(ping_socket, message, msg_size, 0);
+	sent_bytes = nonblocking_write_all(ping_socket, message, msg_size);
 
 /*** TO BE DONE END ***/
 
 	/*** Receive answer through the socket (non blocking mode, with timeout) ***/
 /*** TO BE DONE START ***/
 
-	sent_bytes = send(ping_socket, message, msg_size, 0); //camnbiare flag
+	//c'è bisogno della struct timeval da passaee a setsockopt contenente il timeout
+	struct timeval tout;
+	tout.tv_sec = timeout / 1000;
+	tout.tv_usec = 0;
+
+	//settiamo il timeout
+	if(setsockopt(ping_socket, SOL_SOCKET, SO_RCVTIMEO, &tout, sizeof tout) < 0)
+		fail_errno("Error in setting timeout");
+
+	//riceviamo la risposta
+	recv_bytes = recv(ping_socket, answer_buffer, sent_bytes, 0);
+	//salviamo l'errno (non so se serva "if(recv_bytes < 0)" o meno)
+	recv_errno = errno;
 
 /*** TO BE DONE END ***/
 
 	/*** Store the current time in recv_time ***/
 /*** TO BE DONE START ***/
 
+	if(clock_gettime(CLOCK_TYPE, &recv_time))
+		fail_errno("Error in retrieving current time");
 
 /*** TO BE DONE END ***/
 
@@ -119,6 +133,9 @@ int prepare_udp_socket(char *pong_addr, char *pong_port)
 	memset(&gai_hints, 0, sizeof gai_hints);
 /*** TO BE DONE START ***/
 
+	gai_hints.ai_family = AF_INET;
+	gai_hints.ai_socktype = SOCK_DGRAM;
+	//forse superfluo
 
 /*** TO BE DONE END ***/
 
@@ -127,12 +144,20 @@ int prepare_udp_socket(char *pong_addr, char *pong_port)
 
     /*** change ping_socket behavior to NONBLOCKing using fcntl() ***/
 /*** TO BE DONE START ***/
+
+	if(fcntl(ping_socket, F_SETFD, O_NONBLOCK) == -1)
+		fail_errno("error in setting socket to non-blocking mode");
 	
 
 /*** TO BE DONE END ***/
 
     /*** call getaddrinfo() in order to get Pong Server address in binary form ***/
 /*** TO BE DONE START ***/
+	
+	//getaddrinfo("seti.dibris.unige.it", "1491", &gai_hints, &pong_addrinfo);
+	gai_rv = getaddrinfo(pong_addr, pong_port, &gai_hints, &pong_addrinfo);
+	if(gai_rv != 0)
+		fail("error in getaddrinfo");
 
 
 /*** TO BE DONE END ***/
@@ -151,6 +176,9 @@ int prepare_udp_socket(char *pong_addr, char *pong_port)
 
     /*** connect the ping_socket UDP socket with the server ***/
 /*** TO BE DONE START ***/
+
+	if(connect(ping_socket, pong_addrinfo->ai_addr, pong_addrinfo->ai_addrlen) == -1)
+		fail_errno("error in connecting socket to server");
 
 
 /*** TO BE DONE END ***/
@@ -188,12 +216,21 @@ int main(int argc, char *argv[])
     /*** Specify TCP socket options ***/
 	memset(&gai_hints, 0, sizeof gai_hints);
 /*** TO BE DONE START ***/
+	
+	gai_hints.ai_family = AF_INET;
+	gai_hints.ai_socktype = SOCK_STREAM;
+	gai_hints.ai_protocol = 0;
 
 
 /*** TO BE DONE END ***/
 
     /*** call getaddrinfo() in order to get Pong Server address in binary form ***/
 /*** TO BE DONE START ***/
+	
+	//getaddrinfo("seti.dibris.unige.it", "1491", &gai_hints, &server_addrinfo);
+	gai_rv = getaddrinfo(argv[1], argv[2], &gai_hints, &server_addrinfo);
+	if(gai_rv != 0)
+		fail("error in getaddrinfo");
 
 
 /*** TO BE DONE END ***/
@@ -204,6 +241,20 @@ int main(int argc, char *argv[])
 
     /*** create a new TCP socket and connect it with the server ***/
 /*** TO BE DONE START ***/
+	
+	struct addrinfo *rp;
+
+	for (rp = server_addrinfo; rp != NULL; rp = rp->ai_next) {
+		ask_socket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+		if (ask_socket == -1)
+			continue;
+		if (connect(ask_socket, rp->ai_addr, rp->ai_addrlen) != -1)
+			break;
+		close(ask_socket);
+	}
+
+	if(rp == NULL)
+		fail("error in creating socket");
 
 
 /*** TO BE DONE END ***/
@@ -214,6 +265,9 @@ int main(int argc, char *argv[])
 
     /*** Write the request on the TCP socket ***/
 /** TO BE DONE START ***/
+
+	if(write(ask_socket, request, strlen(request)) == -1)
+		fail_errno("failed sending request to Pong server");
 
 
 /*** TO BE DONE END ***/
@@ -227,6 +281,9 @@ int main(int argc, char *argv[])
 
     /*** Check if the answer is OK, and fail if it is not ***/
 /*** TO BE DONE START ***/
+
+	if(strncmp(answer, "OK", 2) != 0)
+		fail("error in receiving answer from Pong server");
 
 
 /*** TO BE DONE END ***/

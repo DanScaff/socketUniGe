@@ -120,7 +120,9 @@ int main(int argc, char **argv)
 /*** TO BE DONE START ***/
 
 	//getaddrinfo("seti.dibris.unige.it", "1491", &gai_hints, &server_addrinfo);
-	getaddrinfo(argv[1], argv[2], &gai_hints, &server_addrinfo);
+	gai_rv = getaddrinfo(argv[1], argv[2], &gai_hints, &server_addrinfo);
+	if(gai_rv != 0)
+		fail("error in getaddrinfo");
 
 /*** TO BE DONE END ***/
 
@@ -130,6 +132,12 @@ int main(int argc, char **argv)
 
     /*** create a new TCP socket and connect it with the server ***/
 /*** TO BE DONE START ***/
+
+	//SEGUENDO IL MAN
+	/* getaddrinfo() returns a list of address structures.
+	Try each address until we successfully bind(2).
+	If socket(2) (or bind(2)) fails, we (close the socket
+	and) try the next address. */
 
 	struct addrinfo *rp;
 
@@ -162,11 +170,12 @@ int main(int argc, char **argv)
     /*** Write the request on socket ***/
 /*** TO BE DONE START ***/
 
-	write(tcp_socket, request, strlen(request));
+	if(write(tcp_socket, request, strlen(request)) == -1)
+		fail_errno("TCP Ping could not send request to Pong server");
 
 /*** TO BE DONE END ***/
 
-	nr = read(tcp_socket, answer, strlen(answer));
+	nr = read(tcp_socket, answer, sizeof(answer));
 	if (nr < 0)
 		fail_errno("TCP Ping could not receive answer from Pong server");
 		
@@ -174,6 +183,8 @@ int main(int argc, char **argv)
     /*** Check if the answer is OK, and fail if it is not ***/
 /*** TO BE DONE START ***/
 
+	if(strcmp(answer, "OK\n") != 0)
+		fail("error in receiving answer from Pong server");
 
 /*** TO BE DONE END ***/
 
