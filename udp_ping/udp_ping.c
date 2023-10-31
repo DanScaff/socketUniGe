@@ -135,7 +135,6 @@ int prepare_udp_socket(char *pong_addr, char *pong_port)
 
 	gai_hints.ai_family = AF_INET;
 	gai_hints.ai_socktype = SOCK_DGRAM;
-	//forse superfluo
 
 /*** TO BE DONE END ***/
 
@@ -145,7 +144,7 @@ int prepare_udp_socket(char *pong_addr, char *pong_port)
     /*** change ping_socket behavior to NONBLOCKing using fcntl() ***/
 /*** TO BE DONE START ***/
 
-	if(fcntl(ping_socket, F_SETFD, O_NONBLOCK) == -1)
+	if(fcntl(ping_socket, F_SETFL, O_NONBLOCK) == -1)
 		fail_errno("error in setting socket to non-blocking mode");
 	
 
