@@ -47,7 +47,7 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
 /*** TO BE DONE START ***/
 
 	if(clock_gettime(CLOCK_TYPE, &send_time))
-		fail_errno("Error in retrieving current time");
+		fail_errno("Error in getting the correct time");
 
 /*** TO BE DONE END ***/
 
@@ -69,7 +69,7 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
 /*** TO BE DONE START ***/
 
 	if(clock_gettime(CLOCK_TYPE, &recv_time))
-		fail_errno("Error in retrieving current time");
+		fail_errno("Error in getting the correct time");
 
 /*** TO BE DONE END ***/
 

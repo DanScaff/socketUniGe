@@ -52,7 +52,7 @@ void tcp_pong(int message_no, size_t message_size, FILE *in_stream, int out_sock
 /*** TO BE DONE START ***/
 
 	if(clock_gettime(CLOCK_TYPE, &time2))
-		fail_errno("Error in retrieving current time");
+		fail_errno("Error in getting the correct time");
 
 
 /*** TO BE DONE END ***/
@@ -68,7 +68,7 @@ void tcp_pong(int message_no, size_t message_size, FILE *in_stream, int out_sock
 /*** TO BE DONE START ***/
 
 	if(clock_gettime(CLOCK_TYPE, &time3))
-		fail_errno("Error in retrieving current time");
+		fail_errno("Error in getting the correct time");
 
 
 /*** TO BE DONE END ***/
@@ -100,7 +100,7 @@ void udp_pong(int dgrams_no, int dgram_sz, int pong_socket)
 /*** TO BE DONE START ***/
 
 	if(clock_gettime(CLOCK_TYPE, &time2))
-		fail_errno("Error in retrieving current time");
+		fail_errno("Error in getting the correct time");
 
 
 /*** TO BE DONE END ***/
@@ -138,7 +138,7 @@ void udp_pong(int dgrams_no, int dgram_sz, int pong_socket)
 /*** TO BE DONE START ***/
 
 	if(clock_gettime(CLOCK_TYPE, &time3))
-		fail_errno("Error in retrieving current time");
+		fail_errno("Error in getting the correct time");
 
 
 /*** TO BE DONE END ***/
