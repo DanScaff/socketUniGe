@@ -54,8 +54,11 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
     /*** Send the message through the socket (blocking)  ***/
 /*** TO BE DONE START ***/
 
-	sent_bytes = send(tcp_socket, message, msg_size, 0);
-	
+	sent_bytes = blocking_write_all(tcp_socket, message, msg_size);
+	if(sent_bytes == -1)
+		fail_errno("Error sending data");
+	if(sent_bytes != msg_size)
+		fail("Error sending data");
 /*** TO BE DONE END ***/
 
     /*** Receive answer through the socket (blocking) ***/

@@ -58,24 +58,18 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int ping_soc
 /*** TO BE DONE START ***/
 
 	sent_bytes = nonblocking_write_all(ping_socket, message, msg_size);
-
+	if(sent_bytes == -1)
+		fail_errno("Error sending data");
+	if(sent_bytes != msg_size)
+		fail("Error sending data");
+	
 /*** TO BE DONE END ***/
 
 	/*** Receive answer through the socket (non blocking mode, with timeout) ***/
 /*** TO BE DONE START ***/
 
-	//c'è bisogno della struct timeval da passaee a setsockopt contenente il timeout
-	struct timeval tout;
-	tout.tv_sec = timeout / 1000;
-	tout.tv_usec = 0;
-
-	//settiamo il timeout
-	if(setsockopt(ping_socket, SOL_SOCKET, SO_RCVTIMEO, &tout, sizeof tout) < 0)
-		fail_errno("Error in setting timeout");
-
 	//riceviamo la risposta
 	recv_bytes = recv(ping_socket, answer_buffer, sent_bytes, 0);
-	//salviamo l'errno (non so se serva "if(recv_bytes < 0)" o meno)
 	recv_errno = errno;
 
 /*** TO BE DONE END ***/

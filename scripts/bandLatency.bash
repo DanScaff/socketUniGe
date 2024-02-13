@@ -36,8 +36,8 @@ for protocol in "${protocols[@]}" ; do
         set xlabel "msg size(s)"
         set ylabel "throughput (KB/s)"
         lbf(x) = x / ( $L0 + x / $B )
-        plot "../data/${protocol}_throughput.dat" using 1:2 title "${protocol} ping-pong Throughput" with linespoints, \
-                lbf(x) title "Latency-Bandwidth model with L=$L0 and B=$B" with linespoints
+        plot "../data/${protocol}_throughput.dat" using 1:${columnIndex} title "${protocol} ping-pong Throughput" with linespoints, \
+                lbf(x) title "$graphType Latency-Bandwidth model with L=$L0 and B=$B" with linespoints
 
         clear
 	eNDgNUPLOTcOMMAND
