@@ -173,9 +173,13 @@ int main(int argc, char **argv)
     /*** Write the request on socket ***/
 /*** TO BE DONE START ***/
 
-	if(write(tcp_socket, request, strlen(request)) == -1)
-		fail_errno("TCP Ping could not send request to Pong server");
-
+	for(int bytes_sent = 0 ; bytes_sent < strlen(request); ){
+		ssize_t sent = write(tcp_socket, request, strlen(request) - bytes_sent);
+		if(sent < 0)
+			fail_errno("failed sending request to Pong server");
+		bytes_sent += sent;
+	}	
+	
 /*** TO BE DONE END ***/
 
 	nr = read(tcp_socket, answer, sizeof(answer));
